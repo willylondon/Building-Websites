@@ -1,0 +1,29 @@
+name: Sync Donald Quarrie live site
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/sync-dqhs-live.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download deployed site
+        run: |
+          mkdir -p donald-quarrie-high-school
+          curl --fail --silent --show-error https://donald-quarrie-high-school.vercel.app/ -o donald-quarrie-high-school/index.html
+          curl --fail --silent --show-error https://donald-quarrie-high-school.vercel.app/robots.txt -o donald-quarrie-high-school/robots.txt
+          curl --fail --silent --show-error https://donald-quarrie-high-school.vercel.app/sitemap.xml -o donald-quarrie-high-school/sitemap.xml
+      - name: Commit synchronized site
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add donald-quarrie-high-school
+          git diff --cached --quiet || git commit -m 'Sync improved Donald Quarrie High School site'
+          git push
